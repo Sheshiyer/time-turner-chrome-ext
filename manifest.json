@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Time Turner",
+  "version": "1.0.0",
+  "description": "A modern clock visualization with TCM body clock and biorhythm tracking",
+  "permissions": ["storage", "alarms"],
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Time Turner"
+  },
+  "icons": {
+    "128": "icons/icon.svg"
+  }
+}
