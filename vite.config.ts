@@ -8,9 +8,17 @@ export default defineConfig({
     react(),
     crx({ manifest }),
   ],
+  define: {
+    'process.env.GOOGLE_PLACES_API_KEY': JSON.stringify('AIzaSyD1I3MQdhdUepi7qD5LUYYhpBc8oBJBgSk')
+  },
   resolve: {
     alias: {
       '@': '/src',
     },
   },
+  base: './',
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true
+  }
 })

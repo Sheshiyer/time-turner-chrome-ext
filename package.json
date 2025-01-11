@@ -11,16 +11,17 @@
     "build:extension": "vite build && cd dist && zip -r ../time-turner.zip ."
   },
   "dependencies": {
+    "framer-motion": "^11.17.0",
+    "lucide-react": "latest",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "lucide-react": "latest"
+    "react-dom": "^18.0.0"
   },
   "devDependencies": {
+    "@crxjs/vite-plugin": "^2.0.0-beta.18",
     "@types/chrome": "latest",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@vitejs/plugin-react": "^4.2.1",
-    "@crxjs/vite-plugin": "^2.0.0-beta.18",
     "autoprefixer": "latest",
     "postcss": "latest",
     "tailwindcss": "latest",

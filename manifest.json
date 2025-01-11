@@ -4,11 +4,17 @@
   "version": "1.0.0",
   "description": "A modern clock visualization with TCM body clock and biorhythm tracking",
   "permissions": ["storage", "alarms"],
+  "background": {
+    "service_worker": "src/background.ts",
+    "type": "module"
+  },
   "action": {
     "default_popup": "index.html",
     "default_title": "Time Turner"
   },
   "icons": {
-    "128": "icons/icon.svg"
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   }
 }

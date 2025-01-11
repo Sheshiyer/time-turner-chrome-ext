@@ -1,20 +1,66 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useTime } from '../context/TimeContext'
 
+// Organ data with additional styling information
 const ORGANS = [
-  { name: 'Liver', function: 'Detoxification & Planning' },
-  { name: 'Lung', function: 'Breathing & Letting Go' },
-  { name: 'Large Intestine', function: 'Elimination' },
-  { name: 'Stomach', function: 'Breaking Down' },
-  { name: 'Spleen', function: 'Transformation' },
-  { name: 'Heart', function: 'Joy & Circulation' },
-  { name: 'Small Intestine', function: 'Sorting & Processing' },
-  { name: 'Bladder', function: 'Storage & Release' },
-  { name: 'Kidney', function: 'Vitality & Willpower' },
-  { name: 'Pericardium', function: 'Protection & Relationships' },
-  { name: 'Triple Burner', function: 'Temperature & Fluid' },
-  { name: 'Gallbladder', function: 'Decision Making' },
+  { name: 'Liver', function: 'Detoxification & Planning', color: '#4CAF50' },
+  { name: 'Lung', function: 'Breathing & Letting Go', color: '#90CAF9' },
+  { name: 'Large Intestine', function: 'Elimination', color: '#FFB74D' },
+  { name: 'Stomach', function: 'Breaking Down', color: '#F06292' },
+  { name: 'Spleen', function: 'Transformation', color: '#CE93D8' },
+  { name: 'Heart', function: 'Joy & Circulation', color: '#EF5350' },
+  { name: 'Small Intestine', function: 'Sorting & Processing', color: '#FFD54F' },
+  { name: 'Bladder', function: 'Storage & Release', color: '#81C784' },
+  { name: 'Kidney', function: 'Vitality & Willpower', color: '#7986CB' },
+  { name: 'Pericardium', function: 'Protection & Relationships', color: '#FF8A65' },
+  { name: 'Triple Burner', function: 'Temperature & Fluid', color: '#4DB6AC' },
+  { name: 'Gallbladder', function: 'Decision Making', color: '#AED581' },
 ]
+
+const OrganSegment: React.FC<{
+  organ: typeof ORGANS[0]
+  index: number
+  isActive: boolean
+  isNext: boolean
+}> = ({ organ, index, isActive, isNext }) => {
+  const angle = (index * 30)
+  const startAngle = angle - 15
+  const endAngle = angle + 15
+
+  const segmentPath = useMemo(() => {
+    const radius = 140
+    const innerRadius = 80
+    
+    const startRadians = (startAngle * Math.PI) / 180
+    const endRadians = (endAngle * Math.PI) / 180
+    
+    const startX = Math.cos(startRadians) * radius
+    const startY = Math.sin(startRadians) * radius
+    const endX = Math.cos(endRadians) * radius
+    const endY = Math.sin(endRadians) * radius
+    
+    const innerStartX = Math.cos(startRadians) * innerRadius
+    const innerStartY = Math.sin(startRadians) * innerRadius
+    const innerEndX = Math.cos(endRadians) * innerRadius
+    const innerEndY = Math.sin(endRadians) * innerRadius
+    
+    return `M ${startX} ${startY} A ${radius} ${radius} 0 0 1 ${endX} ${endY} L ${innerEndX} ${innerEndY} A ${innerRadius} ${innerRadius} 0 0 0 ${innerStartX} ${innerStartY} Z`
+  }, [startAngle, endAngle])
+
+  return (
+    <path
+      d={segmentPath}
+      fill={organ.color}
+      opacity={isActive ? 0.8 : isNext ? 0.5 : 0.2}
+      className="transition-all duration-300 ease-in-out"
+      style={{
+        filter: isActive ? 'drop-shadow(0 0 10px rgba(255,255,255,0.3))' : 'none',
+        transform: `scale(${isActive ? 1.05 : 1})`,
+        transformOrigin: 'center',
+      }}
+    />
+  )
+}
 
 const OrganClock: React.FC = () => {
   const { organHour, currentTime } = useTime()
@@ -26,52 +72,43 @@ const OrganClock: React.FC = () => {
   const minutesUntilTransition = 120 - (minutes + (currentTime.getHours() % 2) * 60)
 
   return (
-    <div className="flex flex-col items-center gap-4 p-4 bg-gray-800 rounded-lg">
-      <h2 className="text-lg font-semibold">TCM Body Clock</h2>
+    <div className="relative w-[320px] h-[320px]">
+      {/* Backdrop blur and overlay */}
+      <div className="absolute inset-0 backdrop-blur-md bg-black/20 rounded-full" />
       
-      {/* Current Organ Display */}
-      <div className="text-center">
-        <div className="text-xl font-bold text-yellow-400">{currentOrgan.name}</div>
-        <div className="text-sm text-gray-300">{currentOrgan.function}</div>
-      </div>
-
       {/* Organ Wheel */}
-      <div className="relative w-48 h-48">
-        {ORGANS.map((organ, index) => {
-          const isActive = index === organHour
-          const angle = (index * 30) - 90 // -90 to start at 12 o'clock
-          const radius = 80 // pixels
-          const x = Math.cos((angle * Math.PI) / 180) * radius
-          const y = Math.sin((angle * Math.PI) / 180) * radius
-
-          return (
-            <div
-              key={organ.name}
-              className={`absolute w-2 h-2 rounded-full transform -translate-x-1/2 -translate-y-1/2 
-                ${isActive ? 'bg-yellow-400 w-3 h-3' : 'bg-gray-400'}`}
-              style={{
-                left: `${x + 96}px`, // 96 = container width/2
-                top: `${y + 96}px`,
-              }}
-            />
-          )
-        })}
-        
-        {/* Energy Flow Line */}
-        <div
-          className="absolute top-1/2 left-1/2 w-1 bg-blue-400/30 rounded-full origin-bottom transform -translate-x-1/2"
-          style={{
-            height: '80px',
-            transform: `translateX(-50%) rotate(${organHour * 30}deg)`,
-            transformOrigin: '50% 100%',
-          }}
-        />
+      <div className="absolute inset-0">
+        <svg
+          viewBox="-150 -150 300 300"
+          className="w-full h-full transform -rotate-90"
+        >
+          <g className="transform translate-x-0 translate-y-0">
+            {ORGANS.map((organ, index) => (
+              <OrganSegment
+                key={organ.name}
+                organ={organ}
+                index={index}
+                isActive={index === organHour}
+                isNext={index === (organHour + 1) % 12}
+              />
+            ))}
+          </g>
+        </svg>
       </div>
 
-      {/* Next Transition */}
-      <div className="text-center text-sm">
-        <div className="text-gray-400">Next: {nextOrgan.name}</div>
-        <div className="text-gray-500">in {minutesUntilTransition} minutes</div>
+      {/* Current Organ Display */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+        <div className="text-2xl font-bold text-white mb-2 font-['JetBrains_Mono']">
+          {currentOrgan.name}
+        </div>
+        <div className="text-sm text-white/80 mb-4">
+          {currentOrgan.function}
+        </div>
+        <div className="text-sm text-white/60">
+          Next: {nextOrgan.name}
+          <br />
+          in {minutesUntilTransition} minutes
+        </div>
       </div>
     </div>
   )

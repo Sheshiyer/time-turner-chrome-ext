@@ -1,6 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --surface-dark: #1a1b26;
+  --surface-darker: #16161e;
+  --physical-color: #ff6b6b;
+  --emotional-color: #4ecdc4;
+  --intellectual-color: #45b7d1;
+  --active-segment: rgba(70, 130, 180, 0.8);
+  --inactive-segment: rgba(70, 130, 180, 0.4);
+}
 
 body {
   width: 400px;
