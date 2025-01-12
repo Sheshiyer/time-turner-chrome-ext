@@ -23,6 +23,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #1a1b26 0%, #302b63 50%, #24243e 100%);
+  background-attachment: fixed;
 }
 
 #root {

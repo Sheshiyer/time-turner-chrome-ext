@@ -35,23 +35,39 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Load user data from storage on mount
     const loadUserData = async () => {
-      if (typeof chrome !== 'undefined' && chrome.storage) {
-        // Chrome extension environment
-        chrome.storage.local.get(['userData'], (result) => {
+      try {
+        if (typeof chrome !== 'undefined' && chrome.storage) {
+          // Chrome extension environment
+          const result = await new Promise<{ [key: string]: any }>((resolve) => {
+            chrome.storage.local.get(['userData'], resolve)
+          })
           if (result.userData) {
             setUserData(result.userData)
           }
-        })
-      } else {
-        // Development environment
-        const storedData = localStorage.getItem('userData')
-        if (storedData) {
-          setUserData(JSON.parse(storedData))
+        } else {
+          // Development environment
+          const storedData = localStorage.getItem('userData')
+          if (storedData) {
+            setUserData(JSON.parse(storedData))
+          }
         }
+      } catch (error) {
+        console.error('Error loading user data:', error)
       }
     }
     loadUserData()
   }, [])
+
+  // Save user data whenever it changes
+  useEffect(() => {
+    if (userData) {
+      if (typeof chrome !== 'undefined' && chrome.storage) {
+        chrome.storage.local.set({ userData })
+      } else {
+        localStorage.setItem('userData', JSON.stringify(userData))
+      }
+    }
+  }, [userData])
 
   const updateUser = (data: UserData) => {
     setUserData(data)

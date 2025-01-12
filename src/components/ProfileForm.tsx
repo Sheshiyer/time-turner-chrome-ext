@@ -12,22 +12,43 @@ const ProfileForm: React.FC = () => {
   const { userData, updateUser } = useUser()
   const [isEditing, setIsEditing] = useState(!userData)
   const [currentStep, setCurrentStep] = useState(0)
-  const [formData, setFormData] = useState({
-    name: userData?.name || '',
-    birthDate: userData?.birthDate || '',
-    birthTime: userData?.birthTime || '',
-    location: userData?.location || {
-      address: '',
-      lat: 0,
-      lng: 0
+  const debounce = (fn: Function, delay: number) => {
+    let timeoutId: NodeJS.Timeout
+    return (...args: any[]) => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => fn(...args), delay)
+    }
+  }
+
+  const [formData, setFormData] = useState(() => {
+    // Initialize with userData if it exists
+    if (userData) {
+      return {
+        name: userData.name,
+        birthDate: userData.birthDate,
+        birthTime: userData.birthTime,
+        location: userData.location
+      }
+    }
+    // Otherwise use empty defaults
+    return {
+      name: '',
+      birthDate: '',
+      birthTime: '',
+      location: {
+        address: '',
+        lat: 0,
+        lng: 0
+      }
     }
   })
+
+  const debouncedSetFormData = debounce(setFormData, 300)
   
   const autocompleteInput = useRef<HTMLInputElement>(null)
   const [placesLoaded, setPlacesLoaded] = useState(false)
   const [placeError, setPlaceError] = useState('')
 
-  // Google Places setup code remains the same
   useEffect(() => {
     let scriptLoaded = false;
     const loadGooglePlaces = () => {
@@ -134,28 +155,15 @@ const ProfileForm: React.FC = () => {
       exit={{ opacity: 0, y: -20 }}
       className="text-center space-y-6"
     >
-      <motion.h1 
-        className="text-4xl font-bold bg-gradient-to-r from-white via-blue-100 to-gray-300 text-transparent bg-clip-text"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-      >
+      <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-blue-100 to-gray-300 text-transparent bg-clip-text">
         Welcome to Time Turner
-      </motion.h1>
-      <motion.p 
-        className="text-gray-400 text-lg"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-      >
+      </h1>
+      <p className="text-gray-400 text-lg">
         Your personal chronological companion
-      </motion.p>
+      </p>
       <motion.button
         onClick={nextStep}
         className="px-10 py-4 text-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/25 font-medium tracking-wide"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.5 }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
@@ -171,30 +179,30 @@ const ProfileForm: React.FC = () => {
       exit={{ opacity: 0, x: -100 }}
       className="space-y-6"
     >
-      <motion.h2 
-        className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-gray-300 text-transparent bg-clip-text"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
-      >
+      <h2 className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-gray-300 text-transparent bg-clip-text">
         What's your name?
-      </motion.h2>
+      </h2>
       <div className="relative group">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
+        <div>
           <input
             type="text"
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={(e) => {
+              e.preventDefault()
+              debouncedSetFormData({ ...formData, name: e.target.value })
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                if (formData.name) nextStep()
+              }
+            }}
             className="w-full bg-gray-800/50 rounded-lg px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 border border-gray-700/30 backdrop-blur-sm transition-all hover:border-gray-600/30 hover:bg-gray-800/70"
             placeholder="Enter your name"
             required
             autoFocus
           />
-        </motion.div>
+        </div>
       </div>
       <motion.button
         onClick={() => formData.name && nextStep()}
@@ -204,9 +212,6 @@ const ProfileForm: React.FC = () => {
         }`}
         whileHover={formData.name ? { scale: 1.05 } : {}}
         whileTap={formData.name ? { scale: 0.95 } : {}}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
       >
         Next
       </motion.button>
@@ -220,29 +225,29 @@ const ProfileForm: React.FC = () => {
       exit={{ opacity: 0, x: -100 }}
       className="space-y-6"
     >
-      <motion.h2 
-        className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-gray-300 text-transparent bg-clip-text"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
-      >
+      <h2 className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-gray-300 text-transparent bg-clip-text">
         Welcome {formData.name}, when were you born?
-      </motion.h2>
+      </h2>
       <div className="relative group">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
+        <div>
           <input
             type="date"
             value={formData.birthDate}
-            onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+            onChange={(e) => {
+              e.preventDefault()
+              debouncedSetFormData({ ...formData, birthDate: e.target.value })
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                if (formData.birthDate) nextStep()
+              }
+            }}
             className="w-full bg-gray-800/50 rounded-lg px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 border border-gray-700/30 backdrop-blur-sm transition-all hover:border-gray-600/30 hover:bg-gray-800/70 [color-scheme:dark]"
             required
             autoFocus
           />
-        </motion.div>
+        </div>
       </div>
       <motion.button
         onClick={nextStep}
@@ -265,29 +270,29 @@ const ProfileForm: React.FC = () => {
       exit={{ opacity: 0, x: -100 }}
       className="space-y-6"
     >
-      <motion.h2 
-        className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-gray-300 text-transparent bg-clip-text"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
-      >
+      <h2 className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-gray-300 text-transparent bg-clip-text">
         What time were you born?
-      </motion.h2>
+      </h2>
       <div className="relative group">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
+        <div>
           <input
             type="time"
             value={formData.birthTime}
-            onChange={(e) => setFormData({ ...formData, birthTime: e.target.value })}
+            onChange={(e) => {
+              e.preventDefault()
+              debouncedSetFormData({ ...formData, birthTime: e.target.value })
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                if (formData.birthTime) nextStep()
+              }
+            }}
             className="w-full bg-gray-800/50 rounded-lg px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 border border-gray-700/30 backdrop-blur-sm transition-all hover:border-gray-600/30 hover:bg-gray-800/70 [color-scheme:dark]"
             required
             autoFocus
           />
-        </motion.div>
+        </div>
       </div>
       <motion.button
         onClick={nextStep}
@@ -310,21 +315,11 @@ const ProfileForm: React.FC = () => {
       exit={{ opacity: 0, x: -100 }}
       className="space-y-6"
     >
-      <motion.h2 
-        className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-gray-300 text-transparent bg-clip-text"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
-      >
+      <h2 className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-gray-300 text-transparent bg-clip-text">
         Where were you born?
-      </motion.h2>
+      </h2>
       <div className="relative group">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="relative"
-        >
+        <div className="relative">
           <input
             ref={autocompleteInput}
             type="text"
@@ -346,7 +341,7 @@ const ProfileForm: React.FC = () => {
           {placeError && (
             <p className="absolute text-sm text-red-400 mt-2 pl-1">{placeError}</p>
           )}
-        </motion.div>
+        </div>
       </div>
       <motion.button
         onClick={handleSubmit}
@@ -380,17 +375,7 @@ const ProfileForm: React.FC = () => {
 
   return (
     <form onSubmit={(e) => e.preventDefault()} className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-10 mb-4 shadow-xl backdrop-blur-sm border border-gray-700/30 w-[95%] max-w-6xl mx-auto relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),rgba(0,0,0,0))] after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_50%_-20%,rgba(59,130,246,0.08),rgba(0,0,0,0))] hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-500">
-      <motion.div 
-        className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20"
-        animate={{
-          backgroundPosition: ['0% 0%', '200% 0%'],
-        }}
-        transition={{
-          duration: 15,
-          ease: 'linear',
-          repeat: Infinity,
-        }}
-      />
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20" />
       <div className="min-h-[400px] flex items-center justify-center relative z-10">
         <AnimatePresence mode="wait">
           {steps[currentStep]}
