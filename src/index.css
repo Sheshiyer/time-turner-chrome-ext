@@ -1,33 +1,51 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --surface-dark: #1a1b26;
-  --surface-darker: #16161e;
-  --physical-color: #ff6b6b;
-  --emotional-color: #4ecdc4;
-  --intellectual-color: #45b7d1;
-  --active-segment: rgba(70, 130, 180, 0.8);
-  --inactive-segment: rgba(70, 130, 180, 0.4);
+  --surface-darker: #1a1a1a;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 body {
   width: 400px;
   height: 500px;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #1a1b26 0%, #302b63 50%, #24243e 100%);
-  background-attachment: fixed;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
-#root {
+#app {
   width: 100%;
   height: 100%;
 }
