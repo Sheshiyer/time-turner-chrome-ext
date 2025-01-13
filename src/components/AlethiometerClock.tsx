@@ -2,7 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import TcmRing from './TcmRing';
 import BiorhythmRing from './BiorhythmRing';
-import { InformationCircleIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { 
+  InformationCircleIcon, 
+  SunIcon,
+  MoonIcon,
+  ClockIcon,
+  HeartIcon
+} from '@heroicons/react/24/outline';
 
 interface TimeRing {
   type: 'zodiac' | 'lunar' | 'daily';
@@ -17,18 +23,18 @@ interface TimeRing {
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const ZODIAC_SIGNS = [
-  { symbol: '♈', name: 'Aries' },
-  { symbol: '♉', name: 'Taurus' },
-  { symbol: '♊', name: 'Gemini' },
-  { symbol: '♋', name: 'Cancer' },
-  { symbol: '♌', name: 'Leo' },
-  { symbol: '♍', name: 'Virgo' },
-  { symbol: '♎', name: 'Libra' },
-  { symbol: '♏', name: 'Scorpio' },
-  { symbol: '♐', name: 'Sagittarius' },
-  { symbol: '♑', name: 'Capricorn' },
-  { symbol: '♒', name: 'Aquarius' },
-  { symbol: '♓', name: 'Pisces' }
+  { symbol: 'A', name: 'Aries' },
+  { symbol: 'T', name: 'Taurus' },
+  { symbol: 'G', name: 'Gemini' },
+  { symbol: 'C', name: 'Cancer' },
+  { symbol: 'L', name: 'Leo' },
+  { symbol: 'V', name: 'Virgo' },
+  { symbol: 'B', name: 'Libra' },
+  { symbol: 'S', name: 'Scorpio' },
+  { symbol: 'S', name: 'Sagittarius' },
+  { symbol: 'C', name: 'Capricorn' },
+  { symbol: 'A', name: 'Aquarius' },
+  { symbol: 'P', name: 'Pisces' }
 ];
 
 interface AlethiometerClockProps {
@@ -46,6 +52,7 @@ const AlethiometerClock: React.FC<AlethiometerClockProps> = ({ birthDate, birthT
     biorhythm: true
   });
   const [showLegend, setShowLegend] = useState(false);
+  const [currentZodiac, setCurrentZodiac] = useState('');
   
   const calculatePosition = (index: number, total: number, radius: number) => {
     const angle = (index * 360) / total - 90; // -90 to start at top
@@ -58,15 +65,47 @@ const AlethiometerClock: React.FC<AlethiometerClockProps> = ({ birthDate, birthT
   };
 
   // Calculate zodiac position based on birth date
-  const getZodiacPosition = (date: string) => {
+  const getZodiacInfo = (date: string) => {
     const birthDate = new Date(date);
-    const month = birthDate.getMonth();
+    const month = birthDate.getMonth() + 1; // JavaScript months are 0-based
     const day = birthDate.getDate();
     
-    // Simple zodiac calculation (can be made more accurate)
-    const zodiacDates = [20, 19, 21, 20, 21, 21, 23, 23, 23, 23, 22, 22];
-    const zodiacIndex = day >= zodiacDates[month] ? month : (month + 11) % 12;
-    return zodiacIndex;
+    const zodiacRanges = [
+      { sign: 'Capricorn', symbol: 'C', start: { month: 12, day: 22 }, end: { month: 1, day: 19 } },
+      { sign: 'Aquarius', symbol: 'A', start: { month: 1, day: 20 }, end: { month: 2, day: 18 } },
+      { sign: 'Pisces', symbol: 'P', start: { month: 2, day: 19 }, end: { month: 3, day: 20 } },
+      { sign: 'Aries', symbol: 'A', start: { month: 3, day: 21 }, end: { month: 4, day: 19 } },
+      { sign: 'Taurus', symbol: 'T', start: { month: 4, day: 20 }, end: { month: 5, day: 20 } },
+      { sign: 'Gemini', symbol: 'G', start: { month: 5, day: 21 }, end: { month: 6, day: 20 } },
+      { sign: 'Cancer', symbol: 'C', start: { month: 6, day: 21 }, end: { month: 7, day: 22 } },
+      { sign: 'Leo', symbol: 'L', start: { month: 7, day: 23 }, end: { month: 8, day: 22 } },
+      { sign: 'Virgo', symbol: 'V', start: { month: 8, day: 23 }, end: { month: 9, day: 22 } },
+      { sign: 'Libra', symbol: 'B', start: { month: 9, day: 23 }, end: { month: 10, day: 22 } },
+      { sign: 'Scorpio', symbol: 'S', start: { month: 10, day: 23 }, end: { month: 11, day: 21 } },
+      { sign: 'Sagittarius', symbol: 'S', start: { month: 11, day: 22 }, end: { month: 12, day: 21 } }
+    ];
+
+    // Helper function to compare dates
+    const isDateInRange = (month: number, day: number, start: { month: number, day: number }, end: { month: number, day: number }) => {
+      const date = month * 100 + day;
+      const startDate = start.month * 100 + start.day;
+      const endDate = end.month * 100 + end.day;
+      
+      if (startDate > endDate) { // Handles Capricorn case crossing year boundary
+        return date >= startDate || date <= endDate;
+      }
+      return date >= startDate && date <= endDate;
+    };
+
+    const zodiacSign = zodiacRanges.find(range => 
+      isDateInRange(month, day, range.start, range.end)
+    ) || zodiacRanges[0]; // Default to Capricorn if not found
+
+    return {
+      sign: zodiacSign.sign,
+      symbol: zodiacSign.symbol,
+      index: zodiacRanges.indexOf(zodiacSign)
+    };
   };
 
   useEffect(() => {
@@ -74,13 +113,16 @@ const AlethiometerClock: React.FC<AlethiometerClockProps> = ({ birthDate, birthT
 
     // Calculate fixed positions based on birth data
     const [birthHour, birthMinute] = birthTime.split(':').map(Number);
-    const zodiacIndex = getZodiacPosition(birthDate);
+    const { index: zodiacIndex, sign: currentSign } = getZodiacInfo(birthDate);
     
     // Set fixed rotations based on birth time
     gsap.set('.zodiac-ring', {
       rotation: (zodiacIndex * 30), // 360/12 = 30 degrees per zodiac sign
       transformOrigin: 'center center'
     });
+
+    // Update current zodiac
+    setCurrentZodiac(currentSign);
 
     gsap.set('.daily-ring', {
       rotation: ((birthHour + birthMinute/60) * -15), // 360/24 = 15 degrees per hour
@@ -228,8 +270,10 @@ const AlethiometerClock: React.FC<AlethiometerClockProps> = ({ birthDate, birthT
                       className="zodiac-symbol"
                       textAnchor="middle"
                       alignmentBaseline="middle"
-                      fill="#F6F2C0"
+                      fill="url(#zodiacGradient)"
                       fontSize="20"
+                      fontFamily="serif"
+                      fontWeight="bold"
                       filter="url(#glow)"
                       style={{ transform: `rotate(${-angle}deg)` }}
                     >
@@ -328,28 +372,28 @@ const AlethiometerClock: React.FC<AlethiometerClockProps> = ({ birthDate, birthT
           className="p-2 hover:bg-white/10 rounded-full transition-colors"
           title="Toggle Zodiac Ring"
         >
-          {visibleRings.zodiac ? <EyeIcon className="w-5 h-5" /> : <EyeSlashIcon className="w-5 h-5" />}
+          {visibleRings.zodiac ? <SunIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5 opacity-40" />}
         </button>
         <button 
           onClick={() => setVisibleRings(prev => ({ ...prev, tcm: !prev.tcm }))}
           className="p-2 hover:bg-white/10 rounded-full transition-colors"
           title="Toggle TCM Ring"
         >
-          {visibleRings.tcm ? <EyeIcon className="w-5 h-5" /> : <EyeSlashIcon className="w-5 h-5" />}
+          {visibleRings.tcm ? <MoonIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5 opacity-40" />}
         </button>
         <button 
           onClick={() => setVisibleRings(prev => ({ ...prev, daily: !prev.daily }))}
           className="p-2 hover:bg-white/10 rounded-full transition-colors"
           title="Toggle Daily Ring"
         >
-          {visibleRings.daily ? <EyeIcon className="w-5 h-5" /> : <EyeSlashIcon className="w-5 h-5" />}
+          {visibleRings.daily ? <ClockIcon className="w-5 h-5" /> : <ClockIcon className="w-5 h-5 opacity-40" />}
         </button>
         <button 
           onClick={() => setVisibleRings(prev => ({ ...prev, biorhythm: !prev.biorhythm }))}
           className="p-2 hover:bg-white/10 rounded-full transition-colors"
           title="Toggle Biorhythm Ring"
         >
-          {visibleRings.biorhythm ? <EyeIcon className="w-5 h-5" /> : <EyeSlashIcon className="w-5 h-5" />}
+          {visibleRings.biorhythm ? <HeartIcon className="w-5 h-5" /> : <HeartIcon className="w-5 h-5 opacity-40" />}
         </button>
         <div className="w-px h-5 bg-white/10" /> {/* Divider */}
         <button 
@@ -366,7 +410,7 @@ const AlethiometerClock: React.FC<AlethiometerClockProps> = ({ birthDate, birthT
         <div className="absolute bottom-20 right-4 bg-black/80 p-4 rounded-lg shadow-lg w-48">
           <h3 className="font-bold mb-2">Legend</h3>
           <ul className="space-y-2 text-sm">
-            <li>Outer: Zodiac Signs</li>
+            <li>Outer: Zodiac Signs {currentZodiac && `(Current: ${currentZodiac})`}</li>
             <li>Upper Middle: TCM Elements</li>
             <li>Lower Middle: Daily Hours</li>
             <li>Inner: Biorhythm</li>

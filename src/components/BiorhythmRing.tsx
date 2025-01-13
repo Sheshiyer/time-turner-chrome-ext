@@ -12,10 +12,43 @@ interface Cycle {
 }
 
 const CYCLES: Cycle[] = [
-  { name: 'Physical', days: 23, color: '#FF6B6B' },
-  { name: 'Emotional', days: 28, color: '#4ECDC4' },
-  { name: 'Intellectual', days: 33, color: '#FFD93D' }
+  { name: 'Physical', days: 23, color: '#FF4D4D' },
+  { name: 'Emotional', days: 28, color: '#00E5FF' },
+  { name: 'Intellectual', days: 33, color: '#FFD700' }
 ];
+
+// Create gradient definitions for each cycle
+const createGradientId = (name: string) => `biorhythm${name}Gradient`;
+
+const GradientDefs: React.FC = () => (
+  <>
+    <linearGradient id={createGradientId('Physical')} x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stopColor="#FF4D4D" stopOpacity="1" />
+      <stop offset="50%" stopColor="#FF8080" stopOpacity="1" />
+      <stop offset="100%" stopColor="#FF4D4D" stopOpacity="1" />
+    </linearGradient>
+    <linearGradient id={createGradientId('Emotional')} x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stopColor="#00E5FF" stopOpacity="1" />
+      <stop offset="50%" stopColor="#80F1FF" stopOpacity="1" />
+      <stop offset="100%" stopColor="#00E5FF" stopOpacity="1" />
+    </linearGradient>
+    <linearGradient id={createGradientId('Intellectual')} x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stopColor="#FFD700" stopOpacity="1" />
+      <stop offset="50%" stopColor="#FFE866" stopOpacity="1" />
+      <stop offset="100%" stopColor="#FFD700" stopOpacity="1" />
+    </linearGradient>
+    
+    {/* Enhanced glow filter */}
+    <filter id="enhancedGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </>
+);
 
 const BiorhythmRing: React.FC<BiorhythmRingProps> = ({ radius, birthDate }) => {
   const calculateBiorhythm = (cycle: number, birthDate: string) => {
@@ -46,6 +79,9 @@ const BiorhythmRing: React.FC<BiorhythmRingProps> = ({ radius, birthDate }) => {
 
   return (
     <g className="biorhythm-ring">
+      <defs>
+        <GradientDefs />
+      </defs>
       <circle
         cx="200"
         cy="200"
@@ -62,10 +98,11 @@ const BiorhythmRing: React.FC<BiorhythmRingProps> = ({ radius, birthDate }) => {
             key={cycle.name}
             d={createArcPath(cycleRadius, cycle)}
             fill="none"
-            stroke={cycle.color}
-            strokeWidth="2"
-            filter="url(#glow)"
-            opacity="0.8"
+            stroke={`url(#${createGradientId(cycle.name)})`}
+            strokeWidth="4"
+            strokeLinecap="round"
+            filter="url(#enhancedGlow)"
+            opacity="0.9"
           />
         );
       })}
