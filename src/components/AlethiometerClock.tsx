@@ -9,6 +9,8 @@ import {
   ClockIcon,
   HeartIcon
 } from '@heroicons/react/24/outline';
+import CentralInfo from './CentralInfo';
+import { DEFAULT_RINGS } from '../types/rings';
 
 interface TimeRing {
   type: 'zodiac' | 'lunar' | 'daily';
@@ -53,6 +55,7 @@ const AlethiometerClock: React.FC<AlethiometerClockProps> = ({ birthDate, birthT
   });
   const [showLegend, setShowLegend] = useState(false);
   const [currentZodiac, setCurrentZodiac] = useState('');
+  const [showCentralInfo, setShowCentralInfo] = useState(false);
   
   const calculatePosition = (index: number, total: number, radius: number) => {
     const angle = (index * 360) / total - 90; // -90 to start at top
@@ -140,10 +143,20 @@ const AlethiometerClock: React.FC<AlethiometerClockProps> = ({ birthDate, birthT
   }, [birthDate, birthTime]);
 
   return (
-    <div className="relative w-full h-full flex flex-col">
-      {/* Clock container - scaled down by 20% */}
-      <div className="flex-1 flex items-center justify-center pb-20">
-        <div className="w-full max-w-[320px] aspect-square">
+    <div className="relative w-full h-full min-h-[600px] grid grid-rows-[1fr,auto] gap-4 py-4 alethiometer-bg">
+      {/* Central Info Modal */}
+      <CentralInfo
+        visible={showCentralInfo}
+        onClose={() => setShowCentralInfo(false)}
+        rings={DEFAULT_RINGS}
+        birthDate={birthDate}
+        birthTime={birthTime}
+        birthPlace={birthPlace}
+      />
+
+      {/* Clock container */}
+      <div className="flex items-center justify-center">
+        <div className="w-[90%] max-w-[360px] aspect-square relative">
           <svg
             ref={svgRef}
             viewBox="0 0 400 400"
@@ -343,77 +356,98 @@ const AlethiometerClock: React.FC<AlethiometerClockProps> = ({ birthDate, birthT
               <BiorhythmRing radius={50} birthDate={birthDate} />
             </g>
 
-            {/* Center piece */}
-            <circle
-              cx="200"
-              cy="200"
-              r="25"
-              fill="url(#zodiacGradient)"
-              filter="url(#innerShadow)"
-            />
-            
-            {/* Indicator */}
-            <circle
-              cx="200"
-              cy="200"
-              r="5"
-              fill="#F6F2C0"
-              filter="url(#glow)"
-              className="animate-pulse"
-            />
+            {/* Center piece - now clickable */}
+            <g 
+              onClick={() => setShowCentralInfo(true)}
+              className="cursor-pointer transform hover:scale-102 transition-transform"
+              style={{ filter: showCentralInfo ? 'url(#glow)' : 'none' }}
+            >
+              <circle
+                cx="200"
+                cy="200"
+                r="25"
+                fill="url(#zodiacGradient)"
+                filter="url(#innerShadow)"
+              />
+              
+              <circle
+                cx="200"
+                cy="200"
+                r="5"
+                fill="#F6F2C0"
+                filter="url(#glow)"
+                className="animate-pulse"
+              />
+            </g>
           </svg>
         </div>
+
       </div>
 
       {/* Bottom menu */}
-      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-6 p-4 bg-black/80 border-t border-white/10">
-        <button 
-          onClick={() => setVisibleRings(prev => ({ ...prev, zodiac: !prev.zodiac }))}
-          className="p-2 hover:bg-white/10 rounded-full transition-colors"
-          title="Toggle Zodiac Ring"
-        >
-          {visibleRings.zodiac ? <SunIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5 opacity-40" />}
-        </button>
-        <button 
-          onClick={() => setVisibleRings(prev => ({ ...prev, tcm: !prev.tcm }))}
-          className="p-2 hover:bg-white/10 rounded-full transition-colors"
-          title="Toggle TCM Ring"
-        >
-          {visibleRings.tcm ? <MoonIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5 opacity-40" />}
-        </button>
-        <button 
-          onClick={() => setVisibleRings(prev => ({ ...prev, daily: !prev.daily }))}
-          className="p-2 hover:bg-white/10 rounded-full transition-colors"
-          title="Toggle Daily Ring"
-        >
-          {visibleRings.daily ? <ClockIcon className="w-5 h-5" /> : <ClockIcon className="w-5 h-5 opacity-40" />}
-        </button>
-        <button 
-          onClick={() => setVisibleRings(prev => ({ ...prev, biorhythm: !prev.biorhythm }))}
-          className="p-2 hover:bg-white/10 rounded-full transition-colors"
-          title="Toggle Biorhythm Ring"
-        >
-          {visibleRings.biorhythm ? <HeartIcon className="w-5 h-5" /> : <HeartIcon className="w-5 h-5 opacity-40" />}
-        </button>
-        <div className="w-px h-5 bg-white/10" /> {/* Divider */}
-        <button 
-          onClick={() => setShowLegend(!showLegend)}
-          className="p-2 hover:bg-white/10 rounded-full transition-colors"
-          title="Show Legend"
-        >
-          <InformationCircleIcon className="w-5 h-5" />
-        </button>
+      <div className="flex items-center justify-center pb-2">
+        <div className="flex items-center justify-center gap-3 py-2.5 px-5 glass-effect rounded-full shadow-lg">
+          <button 
+            onClick={() => setVisibleRings(prev => ({ ...prev, zodiac: !prev.zodiac }))}
+            className="glass-button"
+            title="Toggle Zodiac Ring"
+          >
+            {visibleRings.zodiac ? <SunIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5 opacity-40" />}
+          </button>
+          <button 
+            onClick={() => setVisibleRings(prev => ({ ...prev, tcm: !prev.tcm }))}
+            className="glass-button"
+            title="Toggle TCM Ring"
+          >
+            {visibleRings.tcm ? <MoonIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5 opacity-40" />}
+          </button>
+          <button 
+            onClick={() => setVisibleRings(prev => ({ ...prev, daily: !prev.daily }))}
+            className="glass-button"
+            title="Toggle Daily Ring"
+          >
+            {visibleRings.daily ? <ClockIcon className="w-5 h-5" /> : <ClockIcon className="w-5 h-5 opacity-40" />}
+          </button>
+          <button 
+            onClick={() => setVisibleRings(prev => ({ ...prev, biorhythm: !prev.biorhythm }))}
+            className="glass-button"
+            title="Toggle Biorhythm Ring"
+          >
+            {visibleRings.biorhythm ? <HeartIcon className="w-5 h-5" /> : <HeartIcon className="w-5 h-5 opacity-40" />}
+          </button>
+          <div className="w-px h-4 bg-white/10" /> {/* Divider */}
+          <button 
+            onClick={() => setShowLegend(!showLegend)}
+            className="glass-button"
+            title="Show Legend"
+          >
+            <InformationCircleIcon className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Legend popup */}
       {showLegend && (
-        <div className="absolute bottom-20 right-4 bg-black/80 p-4 rounded-lg shadow-lg w-48">
-          <h3 className="font-bold mb-2">Legend</h3>
-          <ul className="space-y-2 text-sm">
-            <li>Outer: Zodiac Signs {currentZodiac && `(Current: ${currentZodiac})`}</li>
-            <li>Upper Middle: TCM Elements</li>
-            <li>Lower Middle: Daily Hours</li>
-            <li>Inner: Biorhythm</li>
+        <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 glass-effect p-4 rounded-xl shadow-2xl w-[280px] animate-in slide-up duration-200">
+          <h3 className="font-medium mb-3 bg-gradient-to-r from-[#F6F2C0] to-[#CB9B51] bg-clip-text text-transparent">Legend</h3>
+          <ul className="space-y-2.5 text-sm">
+            <li className="flex items-center gap-2">
+              <span className="text-[#CB9B51]">○</span>
+              <span className="text-white/90">Outer: Zodiac Signs</span>
+              {currentZodiac && <span className="text-white/60 ml-auto">{currentZodiac}</span>}
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-[#F4A460]">○</span>
+              <span className="text-white/90">Upper Middle: TCM Elements</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-[#C0C0C0]">○</span>
+              <span className="text-white/90">Lower Middle: Daily Hours</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-[#FFD700]">○</span>
+              <span className="text-white/90">Inner: Biorhythm</span>
+            </li>
           </ul>
         </div>
       )}

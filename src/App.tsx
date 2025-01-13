@@ -28,21 +28,21 @@ const App: React.FC = () => {
   return (
     <UserProvider>
       <TimeProvider>
-        <div className="w-full h-full bg-[var(--surface-darker)] text-white flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-white/10">
-            <h1 className="text-lg font-semibold">Time Turner</h1>
+        <div className="w-full h-full bg-[var(--surface-darker)] text-white relative">
+          {/* Header - Absolute positioned */}
+          <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-3 bg-[var(--surface-darker)]/80 backdrop-blur-sm z-10">
+            <h1 className="text-lg font-semibold bg-gradient-to-r from-[#F6F2C0] to-[#CB9B51] bg-clip-text text-transparent">Time Turner</h1>
             <button 
               onClick={() => setShowProfile(!showProfile)}
-              className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              className="p-1.5 hover:bg-white/5 rounded-full transition-colors border border-white/10"
             >
-              <UserCircleIcon className="w-6 h-6" />
+              <UserCircleIcon className="w-5 h-5" />
             </button>
           </div>
           
-          {/* Main content */}
-          <div className="flex-1 flex items-center justify-center p-4">
-            <div className="w-full max-w-[400px] aspect-square">
+          {/* Main content - Centered */}
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="w-[85%] max-w-[360px] aspect-square">
               <AlethiometerClock 
                 birthDate="1991-08-13" 
                 birthTime="13:31" 
