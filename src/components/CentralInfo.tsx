@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Ring } from '../types/rings';
 import { getZodiacInfo, getZodiacDescription, getElementColor } from '../utils/zodiac';
+import ProfilePage from './ProfilePage';
 
 interface CentralInfoProps {
   visible: boolean;
@@ -19,18 +20,23 @@ const CentralInfo: React.FC<CentralInfoProps> = ({
   birthTime,
   birthPlace
 }) => {
+  const [showProfile, setShowProfile] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (visible && e.key === 'Escape') {
-        onClose();
+        if (showProfile) {
+          setShowProfile(false);
+        } else {
+          onClose();
+        }
       }
     };
     
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
-  }, [visible, onClose]);
+  }, [visible, onClose, showProfile]);
 
   // Prevent scroll on body when modal is open
   useEffect(() => {
@@ -43,8 +49,6 @@ const CentralInfo: React.FC<CentralInfoProps> = ({
       document.body.style.overflow = 'unset';
     };
   }, [visible]);
-
-  if (!visible) return null;
 
   const getBiorhythmInfo = (birthDate: string) => {
     const birth = new Date(birthDate);
@@ -83,10 +87,30 @@ const CentralInfo: React.FC<CentralInfoProps> = ({
     return organs.find(o => Math.abs(o.time - hour) <= 1)?.organ || organs[0].organ;
   };
 
+  if (!visible) return null;
+
   const zodiacInfo = getZodiacInfo(new Date(birthDate));
   const zodiacDesc = getZodiacDescription(zodiacInfo.sign);
   const biorhythm = getBiorhythmInfo(birthDate);
   const currentOrgan = getTcmTimeInfo(new Date().getHours().toString());
+
+  if (showProfile) {
+    return (
+      <ProfilePage
+        visible={showProfile}
+        onClose={() => setShowProfile(false)}
+        birthDate={birthDate}
+        birthTime={birthTime}
+        birthPlace={birthPlace}
+        timeAnalysis={{
+          zodiacInfo,
+          zodiacDesc,
+          biorhythm,
+          currentOrgan
+        }}
+      />
+    );
+  }
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -104,23 +128,32 @@ const CentralInfo: React.FC<CentralInfoProps> = ({
     >
       <div 
         ref={modalRef}
-        className="bg-[#1a1a1a]/95 border border-white/10 p-6 rounded-2xl w-[92%] max-h-[85vh] overflow-y-auto mx-4 shadow-2xl backdrop-blur-xl animate-in slide-up duration-300" 
+        className="bg-[#1a1a1a]/95 border border-white/10 p-4 rounded-2xl w-[90%] max-h-[80vh] overflow-y-auto mx-auto shadow-2xl backdrop-blur-xl animate-in slide-up duration-300 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30" 
       >
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 id="modal-title" className="text-xl font-medium bg-gradient-to-r from-[#F6F2C0] to-[#CB9B51] bg-clip-text text-transparent">
+            <h2 id="modal-title" className="text-lg font-medium bg-gradient-to-r from-[#F6F2C0] to-[#CB9B51] bg-clip-text text-transparent">
               Current Time Analysis
             </h2>
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-              className="rounded-full p-1.5 hover:bg-white/5 transition-all duration-200 border border-white/10"
-              aria-label="Close modal"
-            >
-              <span className="text-white/70 hover:text-white text-sm">✕</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setShowProfile(true)}
+                className="rounded-lg px-3 py-1.5 hover:bg-white/5 transition-all duration-200 border border-white/10"
+                aria-label="Open profile"
+              >
+                <span className="text-white/70 hover:text-white text-sm">Profile</span>
+              </button>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClose();
+                }}
+                className="rounded-full p-1.5 hover:bg-white/5 transition-all duration-200 border border-white/10"
+                aria-label="Close modal"
+              >
+                <span className="text-white/70 hover:text-white text-sm">✕</span>
+              </button>
+            </div>
           </div>
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
             <h3 className="text-[#CB9B51] font-medium mb-3 flex items-center gap-2">

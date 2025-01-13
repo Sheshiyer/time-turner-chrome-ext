@@ -269,18 +269,18 @@ const AlethiometerClock: React.FC<AlethiometerClockProps> = ({ birthDate, birthT
               <circle
                 cx="200"
                 cy="200"
-                r="170"
+                r="165"
                 fill="url(#engravedPattern)"
                 stroke="url(#zodiacGradient)"
                 strokeWidth="35"
                 opacity="0.7"
               />
               {ZODIAC_SIGNS.map((sign, index) => {
-                const { x, y, angle } = calculatePosition(index, 12, 170);
+                const { x, y, angle } = calculatePosition(index, 12, 165);
                 return (
                   <g key={sign.name} transform={`translate(${x},${y}) rotate(${angle})`}>
                     <text
-                      className="zodiac-symbol"
+                      className="zodiac-symbol cursor-pointer hover:opacity-80 transition-opacity"
                       textAnchor="middle"
                       alignmentBaseline="middle"
                       fill="url(#zodiacGradient)"
@@ -290,6 +290,7 @@ const AlethiometerClock: React.FC<AlethiometerClockProps> = ({ birthDate, birthT
                       filter="url(#glow)"
                       style={{ transform: `rotate(${-angle}deg)` }}
                     >
+                      <title>{sign.name}</title>
                       {sign.symbol}
                     </text>
                   </g>
@@ -302,66 +303,67 @@ const AlethiometerClock: React.FC<AlethiometerClockProps> = ({ birthDate, birthT
               <circle
                 cx="200"
                 cy="200"
-                r="130"
+                r="122"
                 fill="url(#engravedPattern)"
                 stroke="url(#tcmGradient)"
                 strokeWidth="35"
                 opacity="0.7"
               />
-              <TcmRing radius={130} />
+              <TcmRing radius={122} />
             </g>
 
-            {/* Daily ring */}
+            {/* Daily ring with Biorhythm */}
             <g className="daily-ring" style={{ opacity: visibleRings.daily ? 1 : 0 }}>
               <circle
                 cx="200"
                 cy="200"
-                r="90"
+                r="79"
                 fill="url(#engravedPattern)"
                 stroke="url(#dailyGradient)"
                 strokeWidth="35"
                 opacity="0.85"
               />
-              {HOURS.map((hour) => {
-                const { x, y, angle } = calculatePosition(hour, 24, 90);
+              <BiorhythmRing radius={79} birthDate={birthDate} />
+            </g>
+
+            {/* Ghati ring (innermost) */}
+            <g style={{ opacity: visibleRings.biorhythm ? 1 : 0 }}>
+              <circle
+                cx="200"
+                cy="200"
+                r="36"
+                fill="url(#engravedPattern)"
+                stroke="url(#biorhythmGradient)"
+                strokeWidth="35"
+                opacity="0.7"
+              />
+              {/* 60 ghatis in a day */}
+              {Array.from({ length: 60 }, (_, i) => {
+                const angle = (i * 360) / 60 - 90;
+                const radian = (angle * Math.PI) / 180;
+                const x = 200 + 36 * Math.cos(radian);
+                const y = 200 + 36 * Math.sin(radian);
                 return (
-                  <g key={hour} transform={`translate(${x},${y}) rotate(${angle})`}>
+                  <g key={i} transform={`translate(${x},${y}) rotate(${angle})`}>
                     <text
-                      className="hour-marker"
+                      className="ghati-marker cursor-pointer hover:opacity-80 transition-opacity"
                       textAnchor="middle"
                       alignmentBaseline="middle"
                       fill="#F6F2C0"
-                      fontSize="14"
+                      fontSize="8"
                       filter="url(#glow)"
                       style={{ transform: `rotate(${-angle}deg)` }}
                     >
-                      {hour}
+                      <title>Ghati {i + 1} ({(i * 24).toString().padStart(2, '0')}:00 minutes)</title>
+                      {(i + 1).toString().padStart(2, '0')}
                     </text>
                   </g>
                 );
               })}
             </g>
 
-            {/* Biorhythm ring */}
-            <g style={{ opacity: visibleRings.biorhythm ? 1 : 0 }}>
-              <circle
-                cx="200"
-                cy="200"
-                r="50"
-                fill="url(#engravedPattern)"
-                stroke="url(#biorhythmGradient)"
-                strokeWidth="35"
-                opacity="0.7"
-              />
-              <BiorhythmRing radius={50} birthDate={birthDate} />
-            </g>
-
-            {/* Center piece - now clickable */}
-            <g 
-              onClick={() => setShowCentralInfo(true)}
-              className="cursor-pointer transform hover:scale-102 transition-transform"
-              style={{ filter: showCentralInfo ? 'url(#glow)' : 'none' }}
-            >
+            {/* Center piece */}
+            <g className="transform hover:scale-102 transition-transform">
               <circle
                 cx="200"
                 cy="200"
@@ -369,7 +371,6 @@ const AlethiometerClock: React.FC<AlethiometerClockProps> = ({ birthDate, birthT
                 fill="url(#zodiacGradient)"
                 filter="url(#innerShadow)"
               />
-              
               <circle
                 cx="200"
                 cy="200"
@@ -389,37 +390,37 @@ const AlethiometerClock: React.FC<AlethiometerClockProps> = ({ birthDate, birthT
         <div className="flex items-center justify-center gap-3 py-2.5 px-5 glass-effect rounded-full shadow-lg">
           <button 
             onClick={() => setVisibleRings(prev => ({ ...prev, zodiac: !prev.zodiac }))}
-            className="glass-button"
-            title="Toggle Zodiac Ring"
+            className="glass-button cursor-pointer hover:opacity-80 transition-opacity"
+            title="Toggle Zodiac Ring - Shows your astrological influences"
           >
             {visibleRings.zodiac ? <SunIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5 opacity-40" />}
           </button>
           <button 
             onClick={() => setVisibleRings(prev => ({ ...prev, tcm: !prev.tcm }))}
-            className="glass-button"
-            title="Toggle TCM Ring"
+            className="glass-button cursor-pointer hover:opacity-80 transition-opacity"
+            title="Toggle TCM Ring - Traditional Chinese Medicine Elements"
           >
             {visibleRings.tcm ? <MoonIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5 opacity-40" />}
           </button>
           <button 
             onClick={() => setVisibleRings(prev => ({ ...prev, daily: !prev.daily }))}
-            className="glass-button"
-            title="Toggle Daily Ring"
+            className="glass-button cursor-pointer hover:opacity-80 transition-opacity"
+            title="Toggle Daily Ring - 24-hour Cycle"
           >
             {visibleRings.daily ? <ClockIcon className="w-5 h-5" /> : <ClockIcon className="w-5 h-5 opacity-40" />}
           </button>
           <button 
             onClick={() => setVisibleRings(prev => ({ ...prev, biorhythm: !prev.biorhythm }))}
-            className="glass-button"
-            title="Toggle Biorhythm Ring"
+            className="glass-button cursor-pointer hover:opacity-80 transition-opacity"
+            title="Toggle Biorhythm Ring - Your Physical, Emotional, and Intellectual Cycles"
           >
             {visibleRings.biorhythm ? <HeartIcon className="w-5 h-5" /> : <HeartIcon className="w-5 h-5 opacity-40" />}
           </button>
           <div className="w-px h-4 bg-white/10" /> {/* Divider */}
           <button 
-            onClick={() => setShowLegend(!showLegend)}
-            className="glass-button"
-            title="Show Legend"
+            className="glass-button cursor-pointer hover:opacity-80 transition-opacity"
+            title="View Information and Settings"
+            onClick={() => setShowCentralInfo(true)}
           >
             <InformationCircleIcon className="w-5 h-5" />
           </button>

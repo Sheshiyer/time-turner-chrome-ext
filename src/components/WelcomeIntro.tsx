@@ -66,18 +66,18 @@ const WelcomeIntro: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
       </div>
       
       {/* Content */}
-      <div className="relative z-10 text-center p-8 max-w-lg mx-auto">
-        <div className="space-y-8">
+      <div className="relative z-10 text-center p-6 mx-auto">
+        <div className="space-y-6">
           <h1 
             ref={titleRef}
-            className="text-5xl font-bold text-black/90"
+            className="text-3xl font-bold text-black/90"
             style={{ textShadow: '0 0 30px rgba(246, 242, 192, 0.5)' }}
           >
             Welcome to Time Turner
           </h1>
           <p 
             ref={descRef}
-            className="text-xl text-black/80 max-w-md mx-auto leading-relaxed"
+            className="text-base text-black/80 max-w-sm mx-auto leading-relaxed"
           >
             Discover the ancient wisdom of time through a unique blend of zodiac, TCM, and biorhythm cycles.
           </p>
@@ -86,7 +86,7 @@ const WelcomeIntro: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
             onClick={onComplete}
             onMouseEnter={() => handleButtonHover(true)}
             onMouseLeave={() => handleButtonHover(false)}
-            className="relative group px-8 py-4 text-black/90 font-medium tracking-wide
+            className="relative group px-6 py-3 text-black/90 font-medium tracking-wide
                      bg-gradient-to-br from-[#F6F2C0] via-[#CB9B51] to-[#F6E27A]
                      hover:from-[#F6F2C0] hover:via-[#F6E27A] hover:to-[#CB9B51]
                      rounded-full border border-[#F6F2C0]/30 shadow-lg

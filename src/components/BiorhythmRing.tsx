@@ -94,16 +94,18 @@ const BiorhythmRing: React.FC<BiorhythmRingProps> = ({ radius, birthDate }) => {
       {CYCLES.map((cycle, index) => {
         const cycleRadius = radius - (index * 8) - 4;
         return (
-          <path
-            key={cycle.name}
-            d={createArcPath(cycleRadius, cycle)}
-            fill="none"
-            stroke={`url(#${createGradientId(cycle.name)})`}
-            strokeWidth="4"
-            strokeLinecap="round"
-            filter="url(#enhancedGlow)"
-            opacity="0.9"
-          />
+          <g key={cycle.name} className="cursor-pointer hover:opacity-80 transition-opacity">
+            <title>{cycle.name} Cycle: {Math.round(calculateBiorhythm(cycle.days, birthDate) * 100)}%</title>
+            <path
+              d={createArcPath(cycleRadius, cycle)}
+              fill="none"
+              stroke={`url(#${createGradientId(cycle.name)})`}
+              strokeWidth="4"
+              strokeLinecap="round"
+              filter="url(#enhancedGlow)"
+              opacity="0.9"
+            />
+          </g>
         );
       })}
     </g>

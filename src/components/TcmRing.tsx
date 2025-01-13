@@ -47,7 +47,7 @@ const TcmRing: React.FC<TcmRingProps> = ({ radius }) => {
         return (
           <g key={organ.name} transform={`translate(${x},${y}) rotate(${angle})`}>
             <text
-              className="organ-symbol"
+              className="organ-symbol cursor-pointer hover:opacity-80 transition-opacity"
               textAnchor="middle"
               alignmentBaseline="middle"
               fill="#F6F2C0"
@@ -55,6 +55,7 @@ const TcmRing: React.FC<TcmRingProps> = ({ radius }) => {
               filter="url(#glow)"
               style={{ transform: `rotate(${-angle}deg)` }}
             >
+              <title>{organ.name} ({organ.time}:00-{(organ.time + 2) % 24}:00)</title>
               {organ.organ}
             </text>
           </g>
